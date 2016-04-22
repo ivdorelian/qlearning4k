@@ -92,7 +92,7 @@ class ExperienceReplay(Memory):
         Qsa = K.reshape(Qsa, (batch_size, nb_actions))
         delta = K.reshape(self.one_hot(a, nb_actions), (batch_size, nb_actions))
         targets = (1 - delta) * Y[:batch_size] + delta * (r + gamma * (1 - game_over) * Qsa)
-        self.batch_function = K.function(inputs=[samples], outputs=[S, targets])
+        self.batch_function = K.function(inputs=[samples, K.learning_phase()], outputs=[S, targets])
 
     def  one_hot(self, seq, num_classes):
         import theano.tensor as T
@@ -104,5 +104,5 @@ class ExperienceReplay(Memory):
         samples = np.array(sample(self.memory, batch_size))
         if not hasattr(self, 'batch_function'):
             self.set_batch_function(model, self.input_shape, batch_size, model.output_shape[-1], gamma)
-        S, targets = self.batch_function([samples])
+        S, targets = self.batch_function([samples, 1])
         return S, targets
